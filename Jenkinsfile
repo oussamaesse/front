@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    tools {
-        nodejs 'nodejs-20'
-    }
 
     environment {
         NODE_VERSION = '20'
