@@ -1,7 +1,10 @@
 pipeline {
     agent any
+    tools {
+        nodejs 'nodejs-20'
+    }
 
-     environment {
+    environment {
         NODE_VERSION = '20'
         SONARQUBE_INSTALLATION = 'sonar_cube'
     }
