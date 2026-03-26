@@ -1,9 +1,12 @@
 pipeline {
     agent any
 
-    environment {
-        NODE_VERSION = '20'
+     environment {
+        
+        SONARQUBE_INSTALLATION = 'sonar_cube'
+      
     }
+
 
     stages {
         stage('Checkout') {
@@ -39,6 +42,22 @@ pipeline {
             }
         }
 
+ stage('SonarQube analysis') {
+            steps {
+                withSonarQubeEnv("${env.SONARQUBE_INSTALLATION}") {
+                    sh '''
+                        set -e
+                        if [ -z "${SONAR_HOST_URL:-}" ]; then
+                          echo "ERROR: SONAR_HOST_URL is empty. In Jenkins: Manage Jenkins → Configure System → SonarQube servers, set Server URL to an address this agent can reach (not localhost if SonarQube runs elsewhere or Jenkins is in Docker)."
+                          exit 1
+                        fi
+                        bunx sonarqube-scanner \
+                          -Dsonar.host.url="$SONAR_HOST_URL" \
+                          -Dsonar.token="${SONAR_AUTH_TOKEN:-}"
+                    '''
+                }
+            }
+        }
         stage('Build') {
             agent {
                 docker { image "node:${env.NODE_VERSION}" }
