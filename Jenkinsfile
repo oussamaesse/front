@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // define any environment variables here, e.g. REGISTRY_URL = 'registry.example.com'
         NODE_VERSION = '20'
     }
 
@@ -14,27 +13,37 @@ pipeline {
         }
 
         stage('Install Dependencies') {
+            agent {
+                docker { image "node:${env.NODE_VERSION}" }
+            }
             steps {
-                // use npm ci to install exactly what's in package-lock.json
                 sh 'npm ci'
             }
         }
 
         stage('Lint') {
+            agent {
+                docker { image "node:${env.NODE_VERSION}" }
+            }
             steps {
                 sh 'npm run lint'
             }
         }
 
         stage('Test') {
+            agent {
+                docker { image "node:${env.NODE_VERSION}" }
+            }
             steps {
-                // add your test command if you have tests
-                // sh 'npm run test'
                 echo 'No tests configured'
+                // sh 'npm run test'  // Décommenter si vous avez des tests
             }
         }
 
         stage('Build') {
+            agent {
+                docker { image "node:${env.NODE_VERSION}" }
+            }
             steps {
                 sh 'npm run build'
             }
@@ -48,15 +57,14 @@ pipeline {
                 script {
                     def imageName = "${env.JOB_NAME}:${env.BUILD_NUMBER}"
                     sh "docker build -t ${imageName} ."
-                    // Optionally push to registry if credentials are configured
-                    // sh "docker push ${imageName}"
+                    // Optionnel : sh "docker push ${imageName}"
                 }
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploy stage - implement your own deployment logic here'
+                echo 'Deploy stage - implémentez votre logique de déploiement ici'
             }
         }
     }
