@@ -2,9 +2,8 @@ pipeline {
     agent any
 
      environment {
-        
+        NODE_VERSION = '20'
         SONARQUBE_INSTALLATION = 'sonar_cube'
-      
     }
 
 
@@ -16,27 +15,18 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-            agent {
-                docker { image "node:${env.NODE_VERSION}" }
-            }
             steps {
                 sh 'npm ci'
             }
         }
 
         stage('Lint') {
-            agent {
-                docker { image "node:${env.NODE_VERSION}" }
-            }
             steps {
                 sh 'npm run lint'
             }
         }
 
         stage('Test') {
-            agent {
-                docker { image "node:${env.NODE_VERSION}" }
-            }
             steps {
                 echo 'No tests configured'
             }
@@ -59,9 +49,6 @@ pipeline {
             }
         }
         stage('Build') {
-            agent {
-                docker { image "node:${env.NODE_VERSION}" }
-            }
             steps {
                 sh 'npm run build'
             }
