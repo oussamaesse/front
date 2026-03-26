@@ -36,7 +36,6 @@ pipeline {
             }
             steps {
                 echo 'No tests configured'
-                // sh 'npm run test'  // Décommenter si vous avez des tests
             }
         }
 
