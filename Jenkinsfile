@@ -1,10 +1,11 @@
 pipeline {
-    agent any
-
-    // Puts `node` and `npm` on PATH. Name must match Jenkins → Manage Jenkins → Tools → NodeJS
-    // (add Node 20.x from nodejs.org if needed). Rename 'NodeJS-20' here to match your installation label.
-    tools {
-        nodejs 'NodeJS-20'
+    // Node/npm from image — no Jenkins Global Tool "NodeJS" entry required.
+    // Requires Docker on the agent + Docker Pipeline plugin. Mounts host Docker socket for `docker build`.
+    agent {
+        docker {
+            image 'node:20-bookworm-slim'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
     }
 
     environment {
@@ -38,7 +39,7 @@ pipeline {
             }
         }
 
- stage('SonarQube analysis') {
+        stage('SonarQube analysis') {
             steps {
                 withSonarQubeEnv("${env.SONARQUBE_INSTALLATION}") {
                     sh '''
@@ -65,10 +66,15 @@ pipeline {
                 expression { fileExists('Dockerfile') }
             }
             steps {
+                sh '''
+                    if ! command -v docker >/dev/null 2>&1; then
+                      apt-get update -qq
+                      apt-get install -y -qq docker.io
+                    fi
+                '''
                 script {
                     def imageName = "${env.JOB_NAME}:${env.BUILD_NUMBER}"
                     sh "docker build -t ${imageName} ."
-                    // Optionnel : sh "docker push ${imageName}"
                 }
             }
         }
